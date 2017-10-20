@@ -88,18 +88,20 @@ def fetch_info(conf):
     content_length = int(status_line[1:-1])  # status_line looks like: $<content_length>
     datac = fp.read(content_length)  # fetch commandstats to different data buffer
     log_verbose('Received data: %s' % datac)
-    
+
     # process 'cluster info'
-    if conf['cluster'] is True:
-        log_verbose('Sending cluster info command')
-        s.sendall('cluster info\r\n')
-        fp.readline()  # skip first line in the response because it is empty
-        status_line = fp.readline()
-        log_verbose('Received line: %s' % status_line)
+    log_verbose('Sending cluster info command')
+    s.sendall('cluster info\r\n')
+    fp.readline()  # skip first line in the response because it is empty
+    status_line = fp.readline()
+    log_verbose('Received line: %s' % status_line)
+    try:
         content_length = int(status_line[1:-1])  # status_line looks like: $<content_length>
         datacluster = fp.read(content_length)  # fetch cluster info to different data buffer
         log_verbose('Received data: %s' % datacluster)
-
+    except ValueError:
+        log_verbose('Could not receive data, cluster mode disabled')
+        pass
     s.close()
 
     linesep = '\r\n' if '\r\n' in data else '\n'  # assuming all is done in the same connection...
