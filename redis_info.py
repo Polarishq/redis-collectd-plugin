@@ -95,29 +95,37 @@ def fetch_info(conf):
     fp.readline()  # skip first line in the response because it is empty
     status_line = fp.readline()
     log_verbose('Received line: %s' % status_line)
+    cluster_mode = True
     try:
         content_length = int(status_line[1:-1])  # status_line looks like: $<content_length>
         datacluster = fp.read(content_length)  # fetch cluster info to different data buffer
         log_verbose('Received data: %s' % datacluster)
     except ValueError:
         log_verbose('Could not receive data, cluster mode disabled')
+        cluster_mode = False
         pass
     s.close()
 
     linesep = '\r\n' if '\r\n' in data else '\n'  # assuming all is done in the same connection...
     data_dict = parse_info(data.split(linesep))
     datac_dict = parse_info(datac.split(linesep))
-    datacluster_dict = parse_info(datacluster.split(linesep))
+
+    # Cluster mode check
+    if cluster_mode is True:
+        datacluster_dict = parse_info(datacluster.split(linesep))
+        log_verbose('Datacluster: %s' % len(datacluster_dict))
 
     # let us see more raw data just in case
     log_verbose('Data: %s' % len(data_dict))
     log_verbose('Datac: %s' % len(datac_dict))
-    log_verbose('Datacluster: %s' % len(datacluster_dict))
 
     # merge three data sets into one
     data_full = data_dict.copy()
     data_full.update(datac_dict)
-    data_full.update(datacluster_dict)
+
+    # Cluster mode check
+    if cluster_mode is True:
+        data_full.update(datacluster_dict)
 
     log_verbose('Data Full: %s' % len(data_full))
 
