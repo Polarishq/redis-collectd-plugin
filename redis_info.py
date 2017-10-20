@@ -111,7 +111,7 @@ def fetch_info(conf):
     datac_dict = parse_info(datac.split(linesep))
 
     # Cluster mode check
-    if cluster_mode is True:
+    if cluster_mode:
         datacluster_dict = parse_info(datacluster.split(linesep))
         log_verbose('Datacluster: %s' % len(datacluster_dict))
 
@@ -124,7 +124,7 @@ def fetch_info(conf):
     data_full.update(datac_dict)
 
     # Cluster mode check
-    if cluster_mode is True:
+    if cluster_mode:
         data_full.update(datacluster_dict)
 
     log_verbose('Data Full: %s' % len(data_full))
